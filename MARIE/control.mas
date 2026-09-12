@@ -1,0 +1,281 @@
+ORG 100
+Main, LoadImmi 8
+        Store N
+        LoadImmi CO
+        Store Dir
+        JnS Ciclo
+
+        LoadImmi 8
+        Store N
+        LoadImmi PM25
+        Store Dir
+        JnS Ciclo
+
+        LoadImmi 8
+        Store N
+        LoadImmi PM10         
+        Store Dir
+        JnS Ciclo
+
+        LoadImmi 8
+        Store I
+
+        LoadImmi CO
+        Store PtrCO
+        LoadImmi PM25
+        Store PtrPM25
+        LoadImmi PM10
+        Store PtrPM10         
+
+        Load Zero
+        Store COUNTER_HIGH_CO
+        Store COUNTER_LOW_CO
+        Store COUNTER_HIGH_PM25
+        Store COUNTER_LOW_PM25
+        Store COUNTER_HIGH_PM10
+        Store COUNTER_LOW_PM10
+        Store COUNTER_HIGH_SUM
+        Store COUNTER_LOW_SUM
+
+        Load One
+        Store REJILLA
+
+LoopEval, LoadI PtrCO
+        Store ValCO
+        LoadI PtrPM25
+        Store ValPM25
+        LoadI PtrPM10
+        Store ValPM10
+
+        Load ValCO
+        Add ValPM25
+        Add ValPM10           
+        Store SUMA
+
+        JnS Comparar
+
+        Load REJILLA
+        Output
+
+        Load PtrCO
+        Add One
+        Store PtrCO
+        Load PtrPM25
+        Add One
+        Store PtrPM25
+        Load PtrPM10
+        Add One
+        Store PtrPM10
+
+        Load I
+        Subt One
+        Store I
+        Load I
+        Skipcond 400       
+        Jump LoopEval
+        Halt
+
+/CICLO CARGA DATA CHECAR GUARDADO IN
+Ciclo, Load N
+CicloMayor, Load N
+        Skipcond 400       
+        Jump Continue
+InputLoop, JumpI Ciclo
+Continue, Input
+        StoreI Dir
+        Load Dir
+        Add One
+        Store Dir
+        Load N
+        Subt One
+        Store N
+        Jump CicloMayor
+
+
+Comparar, Load ValCO
+        Subt PARAM_CO
+        Skipcond 800       
+        Jump IncLow_CO
+IncHigh_CO, Load COUNTER_HIGH_CO
+        Add One
+        Store COUNTER_HIGH_CO
+        Load Zero
+        Store COUNTER_LOW_CO
+        Jump NextCO
+IncLow_CO, Load COUNTER_LOW_CO
+        Add One
+        Store COUNTER_LOW_CO
+        Load Zero
+        Store COUNTER_HIGH_CO
+
+NextCO, Load ValPM25
+        Subt PARAM_PM25
+        Skipcond 800       
+        Jump IncLow_PM25
+IncHigh_PM25, Load COUNTER_HIGH_PM25
+        Add One
+        Store COUNTER_HIGH_PM25
+        Load Zero
+        Store COUNTER_LOW_PM25
+        Jump NextPM25
+IncLow_PM25, Load COUNTER_LOW_PM25
+        Add One
+        Store COUNTER_LOW_PM25
+        Load Zero
+        Store COUNTER_HIGH_PM25
+
+NextPM25, Load ValPM10
+        Subt PARAM_PM10
+        Skipcond 800       
+        Jump IncLow_PM10
+IncHigh_PM10, Load COUNTER_HIGH_PM10
+        Add One
+        Store COUNTER_HIGH_PM10
+        Load Zero
+        Store COUNTER_LOW_PM10
+        Jump NextPM10
+IncLow_PM10, Load COUNTER_LOW_PM10
+        Add One
+        Store COUNTER_LOW_PM10
+        Load Zero
+        Store COUNTER_HIGH_PM10
+
+NextPM10, Load SUMA
+        Subt PARAM_TOTAL
+        Skipcond 800       
+        Jump IncLow_SUM
+IncHigh_SUM, Load COUNTER_HIGH_SUM
+        Add One
+        Store COUNTER_HIGH_SUM
+        Load Zero
+        Store COUNTER_LOW_SUM
+        Jump UpdateRejilla
+IncLow_SUM, Load COUNTER_LOW_SUM
+        Add One
+        Store COUNTER_LOW_SUM
+        Load Zero
+        Store COUNTER_HIGH_SUM
+
+
+UpdateRejilla, Load COUNTER_HIGH_CO
+        Subt Three
+        Skipcond 800       
+        Jump CheckHighPM25
+        Load Zero
+        Store REJILLA      
+        Jump RetCompare
+
+CheckHighPM25, Load COUNTER_HIGH_PM25
+        Subt Three
+        Skipcond 800       
+        Jump CheckHighPM10
+        Load Zero
+        Store REJILLA
+        Jump RetCompare
+
+CheckHighPM10, Load COUNTER_HIGH_PM10
+        Subt Three
+        Skipcond 800       
+        Jump CheckHighSUM
+        Load Zero
+        Store REJILLA
+        Jump RetCompare
+
+CheckHighSUM, Load COUNTER_HIGH_SUM
+        Subt Three
+        Skipcond 800       
+        Jump CheckLowCO
+        Load Zero
+        Store REJILLA
+        Jump RetCompare
+
+
+CheckLowCO, Load REJILLA
+        Skipcond 400       
+        Jump RetCompare
+
+        Load COUNTER_LOW_CO
+        Subt Three
+        Skipcond 800       
+        Jump CheckLowPM25
+        Load One
+        Store REJILLA
+        Jump RetCompare
+
+CheckLowPM25, Load COUNTER_LOW_PM25
+        Subt Three
+        Skipcond 800       
+        Jump CheckLowPM10
+        Load One
+        Store REJILLA
+        Jump RetCompare
+
+CheckLowPM10, Load COUNTER_LOW_PM10
+        Subt Three
+        Skipcond 800       
+        Jump CheckLowSUM
+        Load One
+        Store REJILLA
+        Jump RetCompare
+
+CheckLowSUM, Load COUNTER_LOW_SUM
+        Subt Three
+        Skipcond 800       
+        Jump RetCompare
+        Load One
+        Store REJILLA
+
+RetCompare, JumpI Comparar
+
+
+Zero, HEX 0000
+One, HEX 0001
+Three, DEC 3
+N, HEX 0000
+I, HEX 0000
+Dir, HEX 0000
+PtrCO, HEX 0000
+PtrPM25, HEX 0000
+PtrPM10, HEX 0000
+ValCO, DEC 0
+ValPM25, DEC 0
+ValPM10, DEC 0
+SUMA, HEX 0000
+REJILLA, HEX 0001
+COUNTER_HIGH_CO, HEX 0000
+COUNTER_LOW_CO, HEX 0000
+COUNTER_HIGH_PM25, HEX 0000
+COUNTER_LOW_PM25, HEX 0000
+COUNTER_HIGH_PM10, HEX 0000
+COUNTER_LOW_PM10, HEX 0000
+COUNTER_HIGH_SUM, HEX 0000
+COUNTER_LOW_SUM, HEX 0000
+PARAM_TOTAL, DEC 45
+PARAM_CO, DEC 30
+PARAM_PM25, DEC 15
+PARAM_PM10, DEC 15
+
+CO, HEX 0
+    HEX 0
+    HEX 0
+    HEX 0
+    HEX 0
+    HEX 0
+    HEX 0
+    HEX 0
+PM25, HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+PM10, HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
+     HEX 0
